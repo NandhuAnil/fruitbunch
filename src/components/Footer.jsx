@@ -48,9 +48,7 @@ const Footer = () => {
               <div className="flex items-start">
                 <i className="fa-solid fa-location-dot w-5 mr-2 mt-1"></i>
                 <span>
-                  23/8A old karkana street<br />
-                  Tiruvannamalai,<br />
-                  606 601.
+                  No:59, sarathambal nagar,<br /> Tiruvannamalai,<br /> Tamil Nadu 606601
                 </span>
               </div>
             </div>

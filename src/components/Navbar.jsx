@@ -1,10 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cartItems } = useCart();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const getRandomColor = () => {
+    const letters = "0123456789ABCDEF";
+    let color = "";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
+  const generateAvatarUrl = (name) => {
+    const firstLetter = name.charAt(0).toUpperCase();
+    const backgroundColor = getRandomColor();
+    const imageSize = 130;
+    return `https://ui-avatars.com/api/?background=${backgroundColor}&size=${imageSize}&color=FFF&font-size=0.60&name=${firstLetter}`;
+  };
 
   return (
     <>
@@ -37,7 +61,7 @@ const Navbar = () => {
       <nav className="bg-white shadow-md sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <Link to="/" className="flex items-center">
-            <img src="/src/assets/images/logo-1.png" alt="Fruit Bunch" className="h-12" />
+            <img src="/src/assets/images/mainlogo.png" alt="Fruit Bunch" className="h-14" />
           </Link>
 
           {/* Desktop menu */}
@@ -46,24 +70,36 @@ const Navbar = () => {
             <Link to="/subscription" className="text-gray-700 hover:text-green-600 font-medium transition">Fruit Bowl Subscription</Link>
             <Link to="/corporate" className="text-gray-700 hover:text-green-600 font-medium transition">Corporate Orders</Link>
             <Link to="/about" className="text-gray-700 hover:text-green-600 font-medium transition">About Us</Link>
-            
+
             <div className="flex items-center space-x-4">
-              <Link to="/login" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition">
-                Login
-              </Link>
-              <Link to="/cart" className="relative bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-md transition flex items-center">
-                <i className="fa-solid fa-cart-shopping mr-2"></i> Cart
-                {cartItems.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                    {cartItems.length}
-                  </span>
-                )}
-              </Link>
+              {!user ? (
+                <Link to="/login" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition">
+                  Login
+                </Link>
+              ) : (
+                <>
+                  <Link to="/cart" className="relative bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-md transition flex items-center">
+                    <i className="fa-solid fa-cart-shopping mr-2"></i> Cart
+                    {cartItems.length > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                        {cartItems.length}
+                      </span>
+                    )}
+                  </Link>
+                  <Link to="/profile" className="flex items-center">
+                    <img
+                      src={generateAvatarUrl(user.name || "U")}
+                      alt="User Avatar"
+                      className="w-10 h-10 rounded-full border-2 border-green-600"
+                    />
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
           {/* Mobile menu button */}
-          <button 
+          <button
             className="md:hidden text-gray-700 focus:outline-none"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
@@ -79,7 +115,7 @@ const Navbar = () => {
               <Link to="/subscription" className="text-gray-700 hover:text-green-600 py-2 transition">Fruit Bowl Subscription</Link>
               <Link to="/corporate" className="text-gray-700 hover:text-green-600 py-2 transition">Corporate Orders</Link>
               <Link to="/about" className="text-gray-700 hover:text-green-600 py-2 transition">About Us</Link>
-              
+
               <div className="flex flex-col space-y-2 pt-2 border-t border-gray-200">
                 <Link to="/login" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-center transition">
                   Login

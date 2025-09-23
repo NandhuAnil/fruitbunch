@@ -153,17 +153,17 @@ const About = () => {
         </div>
 
         <div className="rounded-2xl overflow-hidden shadow-xl">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3899.233735975371!2d79.075913!3d12.232446999999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTLCsDEzJzU2LjgiTiA3OcKwMDQnMzMuMyJF!5e0!3m2!1sen!2sin!4v1747153937506!5m2!1sen!2sin"
-            width="100%"
-            height="450"
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3899.0586626904005!2d79.0956933!3d12.244307300000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bacc17e8a517c7f%3A0xc7eb43ae80e2cef2!2sFRUIT%20BUNCH!5e0!3m2!1sen!2sin!4v1758553288639!5m2!1sen!2sin" 
+            width="100%" 
+            height="450" 
             style={{ border: 0 }}
-            allowFullScreen=""
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade"
             title="Fruit Bunch Location"
             className="rounded-2xl"
-          ></iframe>
+            ></iframe>
         </div>
 
         <div className="mt-8 bg-white p-6 rounded-2xl shadow-lg max-w-2xl mx-auto">
@@ -176,9 +176,7 @@ const About = () => {
               </svg>
               <div>
                 <p className="font-medium text-gray-700">Address</p>
-                <p className="text-gray-600">23/8A old karkana street
-                  Tiruvannamalai,
-                  606 601.</p>
+                <p className="text-gray-600">No:59, sarathambal nagar, Tiruvannamalai, Tamil Nadu 606601</p>
               </div>
             </div>
             <div className="flex items-start">
@@ -187,7 +185,7 @@ const About = () => {
               </svg>
               <div>
                 <p className="font-medium text-gray-700">Opening Hours</p>
-                <p className="text-gray-600">Mon-Sat: 8:00 AM - 8:00 PM</p>
+                <p className="text-gray-600">Mon-Sat: 7:30 AM - 6:00 PM</p>
               </div>
             </div>
           </div>

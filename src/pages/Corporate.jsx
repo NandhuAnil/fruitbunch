@@ -368,7 +368,7 @@ const Corporate = () => {
               <p className="text-gray-600 text-xs lg:text-sm">Corporate clients</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">24h</div>
+              <div className="text-4xl font-bold text-green-600 mb-2">10h</div>
               <p className="text-gray-600 text-xs lg:text-sm">Delivery time</p>
             </div>
             <div className="text-center">

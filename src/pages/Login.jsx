@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from '../../firebaseConfig';
+import { doc, getDoc } from "firebase/firestore";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -9,6 +15,7 @@ const Login = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({
@@ -17,14 +24,53 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Login data:', formData);
+
+    try {
+      setIsLoading(true);
+      setError("");
+
+      // 1. Sign in with Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      const user = userCredential.user;
+
+      // 2. Fetch user data from Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+
+        // Store in localStorage
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            uid: user.uid,
+            email: userData.email,
+            name: userData.name,
+            phone: userData.phone,
+          })
+        );
+
+        console.log("User profile:", userData);
+      } else {
+        console.log("No user profile found in Firestore!");
+      }
+
       setIsLoading(false);
-    }, 1500);
+
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error("Login error:", err.message);
+      setError("Invalid email or password");
+      setIsLoading(false);
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -59,6 +105,7 @@ const Login = () => {
             </Link>
           </p>
         </div>
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div className="relative">

@@ -90,7 +90,7 @@ const Subscription = () => {
     {
       id: 9,
       name: "Greek Yogurt",
-      price: 30,
+      price: 40,
       image: "/src/assets/images/yogurt.jpg",
       isDaily: true
     }
