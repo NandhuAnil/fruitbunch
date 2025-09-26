@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { useNavigate } from 'react-router-dom';
 
 const Subscription = () => {
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const [expandedItems, setExpandedItems] = useState({});
+  const navigate = useNavigate();
 
   const toggleExpand = (id) => {
     setExpandedItems(prev => ({
@@ -30,7 +32,8 @@ const Subscription = () => {
       price: 2499,
       image: "/src/assets/images/basicplan.jpg",
       description: "Apple, Orange, Papaya, Pineapple",
-      moreInfo: "Grapes, Guava, Water melon, Fig, Pears, chikku"
+      moreInfo: "Grapes, Guava, Water melon, Fig, Pears, chikku",
+      type: "plan"
     },
     {
       id: 2,
@@ -38,7 +41,8 @@ const Subscription = () => {
       price: 2999,
       image: "/src/assets/images/primeplan.jpg",
       description: "Apple, Orange, Dragon fruits, Pineapple",
-      moreInfo: "Grapes, Strawberry, Blueberry/cherry, Kiwi, Pears"
+      moreInfo: "Grapes, Strawberry, Blueberry/cherry, Kiwi, Pears",
+      type: "plan"
     },
     {
       id: 3,
@@ -46,7 +50,8 @@ const Subscription = () => {
       price: 2499,
       image: "/src/assets/images/fruit-7.jpg",
       description: "Amla, Guava, Kiwi, Fig",
-      moreInfo: "Grapes, Pineapple, Kiwi, Orange"
+      moreInfo: "Grapes, Pineapple, Kiwi, Orange",
+      type: "plan"
     },
     {
       id: 4,
@@ -54,7 +59,8 @@ const Subscription = () => {
       price: 3499,
       image: "/src/assets/images/dietplan.jpg",
       description: "2 Fruit, 2 Vegetables, Dry Fruit",
-      moreInfo: "Nuts, Sprouts, Steamed Vegetables"
+      moreInfo: "Nuts, Sprouts, Steamed Vegetables",
+      type: "plan"
     },
     {
       id: 5,
@@ -62,7 +68,8 @@ const Subscription = () => {
       price: 2499,
       image: "/src/assets/images/juice2.jpg",
       description: "Nutrients, Quality Proteins, Good fat",
-      moreInfo: "Healthy, Probiotic, Whole carb, antioxidants"
+      moreInfo: "Healthy, Probiotic, Whole carb, antioxidants",
+      type: "plan"
     },
     {
       id: 6,
@@ -70,7 +77,8 @@ const Subscription = () => {
       price: 1199,
       image: "/src/assets/images/kidsplan.jpg",
       description: "Corn, Cucumber, Nuts",
-      moreInfo: "Grapes, Strawberry, Blueberry/cherry, Kiwi, Pears"
+      moreInfo: "Grapes, Strawberry, Blueberry/cherry, Kiwi, Pears",
+      type: "plan"
     }
   ];
 
@@ -79,25 +87,44 @@ const Subscription = () => {
       id: 7,
       name: "Fresh Juice",
       price: 699,
-      image: "/src/assets/images/freshjuice.jpg"
+      image: "/src/assets/images/freshjuice.jpg",
+      type: "drink"
     },
     {
       id: 8,
       name: "Butter milk",
       price: 599,
-      image: "/src/assets/images/butter.jpg"
+      image: "/src/assets/images/butter.jpg",
+      type: "drink"
     },
     {
       id: 9,
       name: "Greek Yogurt",
       price: 40,
       image: "/src/assets/images/yogurt.jpg",
+      type: "drink",
       isDaily: true
     }
   ];
 
+  const hasActivePlan = cartItems.some(item => item.type === "plan");
+
   const handleAddToCart = (product) => {
+    if (product.type === "drink" && !hasActivePlan) {
+      alert("Please subscribe to a plan before adding drinks!");
+      return;
+    }
     addToCart(product);
+    navigate('/cart')
+  };
+
+  const handleSubscribe = (product) => {
+    if (product.type === "drink" && !hasActivePlan) {
+      alert("Please subscribe to a plan before adding drinks!");
+      return;
+    }
+    addToCart(product);
+    navigate('/checkout');
   };
 
   return (
@@ -136,7 +163,7 @@ const Subscription = () => {
                 >
                   Add to Cart
                 </button>
-                <button className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 py-2 px-4 rounded transition">
+                <button onClick={() => handleSubscribe(plan)} className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 py-2 px-4 rounded transition">
                   Subscribe
                 </button>
               </div>
@@ -168,7 +195,7 @@ const Subscription = () => {
                   >
                     Add to Cart
                   </button>
-                  <button className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 py-2 px-4 rounded transition">
+                  <button onClick={() => handleSubscribe(drink)} className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 py-2 px-4 rounded transition">
                     Subscribe
                   </button>
                 </div>

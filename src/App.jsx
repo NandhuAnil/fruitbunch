@@ -15,6 +15,7 @@ import { CartProvider } from "./context/CartContext";
 import WhatsAppFloat from "./components/WhatsAppFloat";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
+import OrderConfirmation from "./pages/OrderConfirm";
 
 // Layout for all "main" user pages
 function MainLayout() {
@@ -43,6 +44,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/orderconfirmation" element={<OrderConfirmation />} />
             <Route
               path="/checkout"
               element={
