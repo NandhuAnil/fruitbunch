@@ -55,7 +55,7 @@ const Checkout = () => {
   const [location, setLocation] = useState(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
-  const [mapCenter, setMapCenter] = useState([12.2253, 79.0747]); // Default center: India
+  const [mapCenter, setMapCenter] = useState([12.2253, 79.0747]); // Default center: Tiruvannamalai, Tamil Nadu
   const [mapZoom, setMapZoom] = useState(5);
   const [mapType, setMapType] = useState('satellite'); // 'satellite' or 'street'
 
@@ -212,9 +212,22 @@ const Checkout = () => {
         items: cartItems,
         amount: cartTotal,
         currency: "INR",
-        status: "created",
+        status: "Success",
         razorpayOrderId: orderId,
         createdAt: serverTimestamp(),
+
+        shipping: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+          country: formData.country,
+          location: location // { lat, lng }
+        }
       });
 
       const options = {

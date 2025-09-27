@@ -29,3 +29,26 @@
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+/* For Chrome, Edge, and Safari */
+::-webkit-scrollbar {
+  width: 6px;       /* Makes it thin */
+  height: 6px;      /* For horizontal scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: #E6F4EA;  /* Light green track matching your gradient */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #43A047; /* Your main green color */
+  border-radius: 10px;
+  border: 1px solid #E6F4EA; /* Optional: adds a border around thumb */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #43A047 #E6F4EA; /* thumb color | track color */
+}
