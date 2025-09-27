@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 const Navbar = () => {
@@ -25,7 +25,7 @@ const Navbar = () => {
 
   const generateAvatarUrl = (name) => {
     const firstLetter = name.charAt(0).toUpperCase();
-    const backgroundColor = getRandomColor();
+    const backgroundColor = "43A047"
     const imageSize = 130;
     return `https://ui-avatars.com/api/?background=${backgroundColor}&size=${imageSize}&color=FFF&font-size=0.60&name=${firstLetter}`;
   };
@@ -66,10 +66,10 @@ const Navbar = () => {
 
           {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-5 lg:space-x-8 text-sm lg:text-md">
-            <Link to="/" className="text-gray-700 hover:text-green-600 font-medium transition">Home</Link>
-            <Link to="/subscription" className="text-gray-700 hover:text-green-600 font-medium transition">Fruit Bowl Subscription</Link>
-            <Link to="/corporate" className="text-gray-700 hover:text-green-600 font-medium transition">Corporate Orders</Link>
-            <Link to="/about" className="text-gray-700 hover:text-green-600 font-medium transition">About Us</Link>
+            <NavLink to="/" className={({ isActive }) => `font-medium transition ${isActive ? "text-green-600" : "text-gray-700 hover:text-green-600"}`}>Home</NavLink>
+            <NavLink to="/subscription" className={({ isActive }) => `font-medium transition ${isActive ? "text-green-600" : "text-gray-700 hover:text-green-600"}`}>Fruit Bowl Subscription</NavLink>
+            <NavLink to="/corporate" className={({ isActive }) => `font-medium transition ${isActive ? "text-green-600" : "text-gray-700 hover:text-green-600"}`}>Corporate Orders</NavLink>
+            <NavLink to="/about" className={({ isActive }) => `font-medium transition ${isActive ? "text-green-600" : "text-gray-700 hover:text-green-600"}`}>About Us</NavLink>
 
             <div className="flex items-center space-x-4">
               {!user ? (
@@ -90,7 +90,7 @@ const Navbar = () => {
                     <img
                       src={generateAvatarUrl(user.name || "U")}
                       alt="User Avatar"
-                      className="w-10 h-10 rounded-full border-2 border-green-600"
+                      className="w-10 h-10 rounded-full"
                     />
                   </Link>
                 </>

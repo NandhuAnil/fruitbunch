@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
 import PrivateRoute from "./utils/PrivateRoute";
+import AdminRoute from "./utils/AdminRoute";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -16,6 +17,9 @@ import WhatsAppFloat from "./components/WhatsAppFloat";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import OrderConfirmation from "./pages/OrderConfirm";
+import AdminPanel from "./pages/AdminPanel";
+import TermsAndConditions from "./pages/TermsAndCondition";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Layout for all "main" user pages
 function MainLayout() {
@@ -54,8 +58,17 @@ function App() {
               }
             />
           </Route>
-
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminPanel />
+              </AdminRoute>
+            }
+          />
           {/* Auth routes without Navbar/Footer */}
+          <Route path="/termsandconditions" element={<TermsAndConditions />} />
+          <Route path="/privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

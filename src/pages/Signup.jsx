@@ -234,7 +234,7 @@ const Signup = () => {
               required
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
-              I agree to the <a href="#" className="text-green-600 hover:text-green-500 transition-colors duration-300">Terms and Conditions</a>
+              I agree to the <a href="/termsandconditions" className="text-green-600 hover:text-green-500 transition-colors duration-300">Terms and Conditions</a>
             </label>
           </div>
 

@@ -14,8 +14,8 @@ const Footer = () => {
               <Link to="/subscription" className="hover:text-green-300 transition">Fruit Bowl Subscription</Link>
               <Link to="/corporate" className="hover:text-green-300 transition">Corporate Orders</Link>
               <Link to="/about" className="hover:text-green-300 transition">About Us</Link>
-              <Link to="/login" className="hover:text-green-300 transition">Login</Link>
-              <Link to="/signup" className="hover:text-green-300 transition">Register</Link>
+              <Link to="/termsandconditions" className="hover:text-green-300 transition">Terms and Conditions</Link>
+              <Link to="/privacypolicy" className="hover:text-green-300 transition">Privacy Policy</Link>
             </div>
           </div>
 
