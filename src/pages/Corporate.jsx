@@ -4,8 +4,12 @@ import homeplan from "../assets/images/homeplan.jpg";
 import BasePlanimage from '../assets/images/basicplan.jpg';
 import Premiumimage from '../assets/images/primeplan.jpg';
 import diabeticplan from '../assets/images/fruit-7.jpg';
+import { db } from '../../firebaseConfig';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const Corporate = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -80,19 +84,20 @@ const Corporate = () => {
     return valid;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Handle form submission
-      console.log('Form submitted:', formData);
-      // Here you would typically send the data to your backend
-      alert('Thank you for your message! We will contact you soon.');
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        message: ''
-      });
+      try {
+        await addDoc(collection(db, "corporateQuotes"), {
+          ...formData,
+          createdAt: Timestamp.now()
+        });
+        alert("Thank you! Your request has been submitted.");
+        setFormData({ name: "", email: "", phone: "", message: "" });
+      } catch (err) {
+        console.error(err);
+        alert("Something went wrong. Please try again.");
+      }
     }
   };
 
@@ -272,8 +277,8 @@ const Corporate = () => {
                   <span>Seasonal selections</span>
                 </li>
               </ul>
-              <button className="w-full bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-3 rounded-lg transition-colors duration-300">
-                Learn More
+              <button onClick={() => navigate("/subscription")} className="w-full bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-3 rounded-lg transition-colors duration-300">
+                View Plan
               </button>
             </div>
           </div>
@@ -310,8 +315,8 @@ const Corporate = () => {
                   <span>Organic options available</span>
                 </li>
               </ul>
-              <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-colors duration-300">
-                Learn More
+              <button onClick={() => navigate("/subscription")} className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-colors duration-300">
+                View Plan
               </button>
             </div>
           </div>
@@ -348,8 +353,8 @@ const Corporate = () => {
                   <span>Nutritionist consultation included</span>
                 </li>
               </ul>
-              <button className="w-full bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-3 rounded-lg transition-colors duration-300">
-                Learn More
+              <button onClick={() => navigate("/subscription")} className="w-full bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-3 rounded-lg transition-colors duration-300">
+                View Plan
               </button>
             </div>
           </div>

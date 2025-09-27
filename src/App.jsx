@@ -20,11 +20,13 @@ import OrderConfirmation from "./pages/OrderConfirm";
 import AdminPanel from "./pages/AdminPanel";
 import TermsAndConditions from "./pages/TermsAndCondition";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Layout for all "main" user pages
 function MainLayout() {
   return (
     <div className="min-h-screen flex flex-col">
+      <ScrollToTop />
       <Navbar />
       <main className="flex-grow">
         <Outlet />

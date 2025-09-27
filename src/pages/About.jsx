@@ -155,17 +155,17 @@ const About = () => {
         </div>
 
         <div className="rounded-2xl overflow-hidden shadow-xl">
-          <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3899.0586626904005!2d79.0956933!3d12.244307300000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bacc17e8a517c7f%3A0xc7eb43ae80e2cef2!2sFRUIT%20BUNCH!5e0!3m2!1sen!2sin!4v1758553288639!5m2!1sen!2sin" 
-            width="100%" 
-            height="450" 
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3899.0586626904005!2d79.0956933!3d12.244307300000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bacc17e8a517c7f%3A0xc7eb43ae80e2cef2!2sFRUIT%20BUNCH!5e0!3m2!1sen!2sin!4v1758553288639!5m2!1sen!2sin"
+            width="100%"
+            height="450"
             style={{ border: 0 }}
-            allowFullScreen="" 
-            loading="lazy" 
+            allowFullScreen=""
+            loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
             title="Fruit Bunch Location"
             className="rounded-2xl"
-            ></iframe>
+          ></iframe>
         </div>
 
         <div className="mt-8 bg-white p-6 rounded-2xl shadow-lg max-w-2xl mx-auto">
@@ -216,21 +216,21 @@ const About = () => {
         </div>
       </section>
 
-      {/* Newsletter Signup */}
+      {/* Call To Action Section */}
       <section className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-3xl p-8 shadow-lg">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">Stay Updated</h2>
-          <p className="text-gray-600 mb-6">Subscribe to our newsletter for health tips, new menu items, and special offers.</p>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Your email address"
-              className="flex-grow px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-            <button className="bg-green-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-300 whitespace-nowrap">
-              Subscribe
-            </button>
-          </div>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
+            Freshness Delivered To Your Door
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Enjoy seasonal fruits, health tips, and exclusive offers — straight from our farm to your family.
+          </p>
+          <Link
+            to="/subscription"
+            className="bg-green-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-300 inline-block"
+          >
+            Start Your Subscription
+          </Link>
         </div>
       </section>
     </div>

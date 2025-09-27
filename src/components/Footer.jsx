@@ -39,22 +39,27 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center">
                 <i className="fa-solid fa-phone w-5 mr-2"></i>
-                <span>+918807239379</span>
+                <a href="tel:+918807239379" className="hover:underline">
+                  +91 8807239379
+                </a>
               </div>
+
               <div className="flex items-center">
                 <i className="fa-solid fa-envelope w-5 mr-2"></i>
-                <span>fruitbunch.tvm@gmail.com</span>
+                <a href="mailto:fruitbunch.tvm@gmail.com" className="hover:underline">
+                  fruitbunch.tvm@gmail.com
+                </a>
               </div>
               <div className="flex items-start">
                 <i className="fa-solid fa-location-dot w-5 mr-2 mt-1"></i>
                 <span>
-                  No:59, sarathambal nagar,<br /> Tiruvannamalai,<br /> Tamil Nadu 606601
+                  No:59, Sarathambal nagar,<br /> Tiruvannamalai,<br /> Tamil Nadu 606601
                 </span>
               </div>
             </div>
           </div>
         </div>
-        
+
         {/* Copyright */}
         <div className="border-t border-green-800 mt-8 pt-8 text-center">
           <p>&copy; {new Date().getFullYear()} Fruit Bunch. All rights reserved.</p>

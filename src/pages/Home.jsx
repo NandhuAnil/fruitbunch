@@ -61,9 +61,9 @@ const Home = () => {
               Enjoy fresh cut fruit daily
             </Link>
           </div>
-          <div className="md:w-1/2 flex justify-center">
+          <div className="w-full md:w-1/2 flex justify-center">
             <div
-              className="relative w-full max-w-md h-[220px] md:h-[280px] lg:h-[400px] overflow-hidden rounded-lg shadow-xl"
+              className="relative w-full max-w-md h-[200px] md:h-[280px] lg:h-[400px] overflow-hidden rounded-lg shadow-xl"
               data-aos="fade-left"
               data-aos-delay="300"
             >

@@ -37,26 +37,11 @@ const Checkout = () => {
     country: 'India'
   });
 
-  // useEffect(() => {
-  //   const fetchSubscription = async () => {
-  //     if (!user) return;
-  //     try {
-  //       const ud = await getDoc(doc(db, "users", user.uid));
-  //       if (ud.exists()) {
-  //         const data = ud.data();
-  //       }
-  //     } catch (err) {
-  //       console.error("Failed to get user data", err);
-  //     }
-  //   };
-  //   fetchSubscription();
-  // }, [user]);
-
   const [location, setLocation] = useState(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [mapCenter, setMapCenter] = useState([12.2253, 79.0747]); // Default center: Tiruvannamalai, Tamil Nadu
-  const [mapZoom, setMapZoom] = useState(5);
+  const [mapZoom, setMapZoom] = useState(13);
   const [mapType, setMapType] = useState('satellite'); // 'satellite' or 'street'
 
   // Custom marker icon

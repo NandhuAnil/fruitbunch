@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, updateDoc, query, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, query, orderBy, Timestamp, increment, arrayUnion } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -143,20 +143,46 @@ const AdminPanel = () => {
     }
   };
 
-  const handleCancelToday = async (userId) => {
+  // Cancel only for one user
+  const handleCancelDay = async (subId) => {
     try {
-      alert(`Cancelled delivery for user ${userId} for today`);
+      const subsRef = doc(db, "subscriptions", subId);
+      await updateDoc(subsRef, {
+        extraDays: increment(1),
+        events: arrayUnion({
+          type: "cancel",
+          date: new Date().toISOString(),
+        }),
+      });
+      alert("Cancelled today for this user. Timeline extended by 1 day.");
     } catch (error) {
-      console.error('Error cancelling delivery:', error);
+      console.error("Error cancelling day:", error);
     }
   };
 
-  const handleLeaveToday = async (userId) => {
+  // Leave for all users
+  const handleGlobalLeave = async () => {
     try {
-      alert(`Marked leave for user ${userId} for today`);
+      const subsSnap = await getDocs(collection(db, "subscriptions"));
+      subsSnap.forEach(async (sub) => {
+        await updateDoc(doc(db, "subscriptions", sub.id), {
+          extraDays: increment(1),
+          events: arrayUnion({
+            type: "leave",
+            date: new Date().toISOString(),
+          }),
+        });
+      });
+      alert("Marked today as leave. Timeline extended by 1 day for all users.");
     } catch (error) {
-      console.error('Error marking leave:', error);
+      console.error("Error marking leave:", error);
     }
+  };
+
+  const calculateEndDate = (startDate, planDays, extraDays) => {
+    const start = new Date(startDate);
+    start.setDate(start.getDate() + planDays + extraDays - 1);
+    return start.toLocaleDateString("en-GB"); // dd/mm/yyyy
   };
 
   const openOrderModal = (order) => {
@@ -240,11 +266,10 @@ const AdminPanel = () => {
                     setActiveTab(tab.id);
                     setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition-all duration-200 ${
-                    activeTab === tab.id
-                      ? 'bg-emerald-50 text-emerald-700 border-l-4 border-emerald-600 shadow-sm'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                  className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeTab === tab.id
+                    ? 'bg-emerald-50 text-emerald-700 border-l-4 border-emerald-600 shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
                 >
                   <i className={`fas ${tab.icon} text-lg mr-3`}></i>
                   <span className="font-medium">{tab.label}</span>
@@ -256,10 +281,10 @@ const AdminPanel = () => {
             <div className="p-4 border-t border-gray-100">
               <div className="text-center text-sm text-gray-500">
                 {/* <i className="fas fa-calendar-day mr-2"></i> */}
-                {new Date().toLocaleDateString('en-US', { 
-                  weekday: 'short', 
-                  month: 'short', 
-                  day: 'numeric' 
+                {new Date().toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric'
                 })}
               </div>
             </div>
@@ -413,13 +438,13 @@ const AdminPanel = () => {
                               <i className="fas fa-eye mr-1"></i>
                               View
                             </button>
-                            <button
+                            {/* <button
                               onClick={() => handleCancelToday(subscription.user.id)}
                               className="text-amber-600 hover:text-amber-800 px-3 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors"
                             >
                               <i className="fas fa-ban mr-1"></i>
                               Cancel
-                            </button>
+                            </button> */}
                           </td>
                         </tr>
                       ))}
@@ -506,7 +531,7 @@ const AdminPanel = () => {
                               <i className="fas fa-eye mr-1"></i>
                               View
                             </button>
-                            <select
+                            {/* <select
                               value={order.deliveryStatus || 'pending'}
                               onChange={(e) => updateDeliveryStatus(order.id, e.target.value)}
                               className="text-sm border border-emerald-200 rounded-lg px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
@@ -520,7 +545,7 @@ const AdminPanel = () => {
                               <option value="not_delivered">
                                 <i className="fas fa-times-circle"></i> Not Delivered
                               </option>
-                            </select>
+                            </select> */}
                           </td>
                         </tr>
                       ))}
@@ -556,7 +581,7 @@ const AdminPanel = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                       <div className="bg-gradient-to-br from-emerald-500 to-green-500 p-6 rounded-2xl text-white shadow-lg">
@@ -592,6 +617,15 @@ const AdminPanel = () => {
                           Requires attention
                         </div>
                       </div>
+                    </div>
+
+                    <div className="flex justify-end mb-4">
+                      <button
+                        onClick={handleGlobalLeave}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg"
+                      >
+                        Mark as Today Leave
+                      </button>
                     </div>
 
                     <div className="overflow-x-auto">
@@ -633,12 +667,20 @@ const AdminPanel = () => {
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <select
                                   value={order.deliveryStatus || 'pending'}
-                                  onChange={(e) => updateDeliveryStatus(order.id, e.target.value)}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (value === "cancel") {
+                                      handleCancelDay(order.userId); // extend only that user’s plan
+                                    } else {
+                                      updateDeliveryStatus(order.id, value); // existing delivery status update
+                                    }
+                                  }}
                                   className="text-sm border border-emerald-200 rounded-lg px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                                 >
                                   <option value="pending">Pending</option>
                                   <option value="delivered">Delivered</option>
                                   <option value="not_delivered">Not Delivered</option>
+                                  <option value="cancel">Cancel Today</option>
                                 </select>
                               </td>
                             </tr>
@@ -672,7 +714,7 @@ const AdminPanel = () => {
                     Active subscribers
                   </div>
                 </div>
-                
+
                 <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-6 rounded-2xl text-white shadow-lg">
                   <div className="flex items-center justify-between">
                     <div>
@@ -691,7 +733,7 @@ const AdminPanel = () => {
                     All-time deliveries
                   </div>
                 </div>
-                
+
                 <div className="bg-gradient-to-br from-emerald-600 to-green-700 p-6 rounded-2xl text-white shadow-lg">
                   <div className="flex items-center justify-between">
                     <div>
@@ -773,8 +815,9 @@ const AdminPanel = () => {
                       className="w-full h-64 rounded-xl"
                     >
                       <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.google.com/maps">Google</a>'
+                        url="https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}"
+                        subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
                       />
                       <Marker
                         position={[selectedOrder.shipping.location.lat, selectedOrder.shipping.location.lng]}
