@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import logo from '../assets/images/mainlogo.png';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,15 +14,6 @@ const Navbar = () => {
       setUser(JSON.parse(storedUser));
     }
   }, []);
-
-  const getRandomColor = () => {
-    const letters = "0123456789ABCDEF";
-    let color = "";
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  };
 
   const generateAvatarUrl = (name) => {
     const firstLetter = name.charAt(0).toUpperCase();
@@ -61,7 +53,7 @@ const Navbar = () => {
       <nav className="bg-white shadow-md sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <Link to="/" className="flex items-center">
-            <img src="/src/assets/images/mainlogo.png" alt="Fruit Bunch" className="h-14" />
+            <img src={logo} alt="Fruit Bunch" className="h-14" />
           </Link>
 
           {/* Desktop menu */}

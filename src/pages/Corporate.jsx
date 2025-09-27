@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import primeplan from "../assets/images/primeplan.jpg";
+import homeplan from "../assets/images/homeplan.jpg";
+import BasePlanimage from '../assets/images/basicplan.jpg';
+import Premiumimage from '../assets/images/primeplan.jpg';
+import diabeticplan from '../assets/images/fruit-7.jpg';
 
 const Corporate = () => {
   const [formData, setFormData] = useState({
@@ -18,10 +23,7 @@ const Corporate = () => {
   const [currentImage, setCurrentImage] = useState(0);
 
   // Hero images
-  const heroImages = [
-    "/src/assets/images/primeplan.jpg",
-    "/src/assets/images/homeplan.jpg"
-  ];
+  const heroImages = [primeplan, homeplan];
 
   // Hero image rotation
   useEffect(() => {
@@ -239,7 +241,7 @@ const Corporate = () => {
           <div className="bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
             <div className="relative overflow-hidden h-64">
               <img
-                src="/src/assets/images/basicplan.jpg"
+                src={BasePlanimage}
                 alt="Basic Plan"
                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
               />
@@ -280,7 +282,7 @@ const Corporate = () => {
           <div className="bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
             <div className="relative overflow-hidden h-64">
               <img
-                src="/src/assets/images/primeplan.jpg"
+                src={Premiumimage}
                 alt="Premium Plan"
                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
               />
@@ -318,7 +320,7 @@ const Corporate = () => {
           <div className="bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
             <div className="relative overflow-hidden h-64">
               <img
-                src="/src/assets/images/dietplan.jpg"
+                src={diabeticplan}
                 alt="Diet Plan"
                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
               />

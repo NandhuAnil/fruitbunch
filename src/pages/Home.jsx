@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import home1 from "../assets/images/home-1.png";
+import home2 from "../assets/images/home-2.png";
+import backbowl1 from "../assets/images/backbowl1.png";
+import sixfruit from "../assets/images/sixfruit.jpg";
+import homeplan from "../assets/images/homeplan.jpg";
 
 const Home = () => {
   const [currentImage, setCurrentImage] = useState(0);
 
   // Hero images
-  const heroImages = [
-    "/src/assets/images/home-2.png",
-    "/src/assets/images/home-1.png",
-    "/src/assets/images/backbowl1.png"
-  ];
+  const heroImages = [home2, home1, backbowl1];
 
   // Hero image rotation
   useEffect(() => {
@@ -97,7 +98,7 @@ const Home = () => {
             >
               <div className="relative">
                 <img
-                  src="/src/assets/images/sixfruit.jpg"
+                  src={sixfruit}
                   alt="Variety of fruits"
                   className="w-full max-w-md rounded-lg shadow-md mx-auto transform transition-transform duration-700 hover:scale-105"
                 />
@@ -205,7 +206,7 @@ const Home = () => {
               <div className="bg-green-100 p-8 text-center h-full flex flex-col justify-center">
                 <div className="relative inline-block">
                   <img
-                    src="/src/assets/images/homeplan.jpg"
+                    src={homeplan}
                     alt="Balanced Diet Platter"
                     className="w-full max-w-xs mx-auto rounded-lg mb-4 transform transition-transform duration-700 hover:scale-105"
                   />

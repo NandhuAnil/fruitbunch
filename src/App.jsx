@@ -38,7 +38,7 @@ function MainLayout() {
 function App() {
   return (
     <CartProvider>
-      <Router>
+      <Router basename="/fruitbunch">
         <Routes>
           {/* All routes that share Navbar + Footer */}
           <Route element={<MainLayout />}>

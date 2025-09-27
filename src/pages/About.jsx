@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import aboutImage from '/src/assets/images/about-3.jpg';
+import aboutBackImg from '/src/assets/images/aboutbackimgg.jpg';
 
 const About = () => {
   return (
@@ -63,7 +65,7 @@ const About = () => {
         <div className="lg:w-1/2 order-1 lg:order-2">
           <div className="relative rounded-2xl overflow-hidden shadow-2xl w-full max-w-xl aspect-[4/4]">
             <img
-              src="/src/assets/images/about-3.jpg"
+              src={aboutImage}
               alt="About Fruit Bunch"
               className="w-full h-full object-cover rounded-2xl transition-transform duration-700 hover:scale-105"
             />
@@ -195,7 +197,7 @@ const About = () => {
       {/* CTA Banner */}
       <section className="relative rounded-2xl overflow-hidden shadow-xl mb-16">
         <img
-          src="/src/assets/images/aboutbackimgg.jpg"
+          src={aboutBackImg}
           alt="Fresh fruits background"
           className="w-full h-96 object-cover"
         />
