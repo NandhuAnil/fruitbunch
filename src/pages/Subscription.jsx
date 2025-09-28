@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import BasePlanimage from '../assets/images/BasicPlanImage.jpeg';
 import Premiumimage from '../assets/images/PeriumPlanImage.jpeg';
 import diabeticplan from '../assets/images/fruit-7.jpg';
-import balanceddiet from '../assets/images/BalancedDiet.jpeg';
+import balanceddiet from '../assets/images/BalancedDiet.png';
 import saladplan from '../assets/images/juice2.jpg';
 import kidsplan from '../assets/images/kidsplan.jpg';
 import freshjuice from '../assets/images/freshjuice.jpg';
@@ -64,7 +64,7 @@ const Subscription = () => {
     },
     {
       id: 4,
-      name: "Diet platter",
+      name: "Balanced Diet platter",
       price: 3499,
       image: balanceddiet,
       description: "2 Fruit, 2 Vegetables, Dry Fruit",

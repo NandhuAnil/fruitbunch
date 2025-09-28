@@ -12,6 +12,7 @@ const AdminRoute = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
         setIsAdmin(false);
+        localStorage.setItem("isAdmin", JSON.stringify(false));
         setLoading(false);
         return;
       }
@@ -20,7 +21,9 @@ const AdminRoute = ({ children }) => {
       const adminRef = doc(db, "admins", currentUser.uid);
       const adminSnap = await getDoc(adminRef);
 
-      setIsAdmin(adminSnap.exists());
+      const isAdminUser = adminSnap.exists();
+      setIsAdmin(isAdminUser);
+      localStorage.setItem("isAdmin", JSON.stringify(isAdminUser));
       setLoading(false);
     });
 

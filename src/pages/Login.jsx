@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from '../../firebaseConfig';
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, setDoc, where, getDocs } from "firebase/firestore";
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
   const [formData, setFormData] = useState({
-    email: '',
+    identifier: '',
     password: ''
   });
 
@@ -31,10 +31,35 @@ const Login = () => {
       setIsLoading(true);
       setError("");
 
+      let emailToLogin = formData.identifier;
+
+      // Check if identifier is phone (not containing "@")
+      if (!formData.identifier.includes("@")) {
+        // Lookup phone → uid mapping
+        const phoneDocRef = doc(db, "phoneToUid", formData.identifier);
+        const phoneDoc = await getDoc(phoneDocRef);
+
+        if (!phoneDoc.exists()) {
+          throw new Error("No account found with this phone number");
+        }
+
+        const { uid } = phoneDoc.data();
+
+        // Now fetch user profile to get email
+        const userDocRef = doc(db, "users", uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (!userDoc.exists()) {
+          throw new Error("User profile not found");
+        }
+
+        emailToLogin = userDoc.data().email;
+      }
+
       // 1. Sign in with Firebase Auth
       const userCredential = await signInWithEmailAndPassword(
         auth,
-        formData.email,
+        emailToLogin,
         formData.password
       );
 
@@ -43,10 +68,16 @@ const Login = () => {
       // 2. Fetch user data from Firestore
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
+      const adminRef = doc(db, "admins", user.uid);
+      const adminSnap = await getDoc(adminRef);
 
+      const isAdminUser = adminSnap.exists();
       if (userDoc.exists()) {
         const userData = userDoc.data();
-
+        // Set user state in localStorage
+        setIsLoading(false);
+        // Set isAdmin in localStorage
+        localStorage.setItem("isAdmin", JSON.stringify(isAdminUser));
         // Store in localStorage
         localStorage.setItem(
           "user",
@@ -58,17 +89,15 @@ const Login = () => {
           })
         );
 
-        console.log("User profile:", userData);
       } else {
         console.log("No user profile found in Firestore!");
       }
 
       setIsLoading(false);
-
       navigate(from, { replace: true });
     } catch (err) {
       console.error("Login error:", err.message);
-      setError("Invalid email or password");
+      setError(err.message || "Invalid credentials");
       setIsLoading(false);
     }
   };
@@ -109,16 +138,16 @@ const Login = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div className="relative">
-              <label htmlFor="email" className="sr-only">Email address</label>
+              <label htmlFor="identifier" className="sr-only">Email address or Phone Number</label>
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="identifier"
+                name="identifier"
+                type="text"
                 autoComplete="email"
                 required
                 className="relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 peer"
-                placeholder="Email address"
-                value={formData.email}
+                placeholder="Email address or Phone Number"
+                value={formData.identifier}
                 onChange={handleChange}
               />
             </div>

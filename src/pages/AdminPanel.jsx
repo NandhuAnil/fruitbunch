@@ -31,6 +31,8 @@ const AdminPanel = () => {
   const [attendanceData, setAttendanceData] = useState({});
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedAttendanceOrder, setSelectedAttendanceOrder] = useState(null);
+  const [showAttendanceModal, setShowAttendanceModal] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -98,30 +100,66 @@ const AdminPanel = () => {
 
   const fetchAttendanceData = async () => {
     try {
-      const selectedOrders = orders.filter(order => order.createdAt.toISOString().split('T')[0] === selectedDate);
+      const selected = new Date(selectedDate);
+
+      const selectedOrders = orders.map(order => {
+        const extraDays = order.extraDays || 0;
+        const daysLeft = calculateDaysLeft(order.createdAt, extraDays);
+        const subscriptionStatus = calculateSubscriptionStatus(order.createdAt, extraDays);
+
+        return {
+          ...order,
+          daysLeft,
+          subscriptionStatus,
+          customerName: `${order.shipping?.firstName || ''} ${order.shipping?.lastName || ''}`.trim() || 'Unknown Customer'
+        };
+      }).filter(order => {
+        // Filter orders that are valid for the selected date
+        const startDate = new Date(order.createdAt);
+        const baseValidityDays = 26;
+        const totalValidityDays = baseValidityDays + (order.extraDays || 0);
+
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + totalValidityDays - 1);
+
+        return selected >= startDate && selected <= endDate;
+      });
 
       setAttendanceData({
         date: selectedDate,
         totalOrders: selectedOrders.length,
-        delivered: selectedOrders.filter(o => o.deliveryStatus === 'delivered').length,
-        notDelivered: selectedOrders.filter(o => !o.deliveryStatus || o.deliveryStatus === 'pending' || o.deliveryStatus === 'not_delivered').length,
+        delivered: selectedOrders.filter(o => o.deliveryStatus === "delivered").length,
+        notDelivered: selectedOrders.filter(o =>
+          !o.deliveryStatus ||
+          o.deliveryStatus === "pending" ||
+          o.deliveryStatus === "not_delivered" ||
+          o.deliveryStatus === "cancelled"
+        ).length,
         orders: selectedOrders
       });
     } catch (error) {
-      console.error('Error fetching attendance data:', error);
+      console.error("Error fetching attendance data:", error);
     }
   };
 
-  const calculateDaysLeft = (startDate) => {
-    const expiryDate = new Date(startDate);
-    expiryDate.setDate(expiryDate.getDate() + 26);
+  const calculateDaysLeft = (startDate, extraDays = 0) => {
+    if (!startDate) return 0;
+
+    const start = new Date(startDate);
+    const baseValidityDays = 26; // Base subscription period
+    const totalValidityDays = baseValidityDays + (extraDays || 0);
+
+    const expiryDate = new Date(start);
+    expiryDate.setDate(start.getDate() + totalValidityDays);
+
     const now = new Date();
     const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+
     return Math.max(0, daysLeft);
   };
 
-  const calculateSubscriptionStatus = (startDate) => {
-    const daysLeft = calculateDaysLeft(startDate);
+  const calculateSubscriptionStatus = (startDate, extraDays = 0) => {
+    const daysLeft = calculateDaysLeft(startDate, extraDays);
     if (daysLeft === 0) return 'expired';
     if (daysLeft <= 7) return 'expiring_soon';
     return 'active';
@@ -136,6 +174,11 @@ const AdminPanel = () => {
       });
       setOrders(prev => prev.map(order => order.id === orderId ? { ...order, deliveryStatus: status } : order));
       if (selectedOrder?.id === orderId) setSelectedOrder(prev => ({ ...prev, deliveryStatus: status }));
+      if (selectedAttendanceOrder?.id === orderId) setSelectedAttendanceOrder(prev => ({ ...prev, deliveryStatus: status }));
+
+      // Refresh attendance data
+      fetchAttendanceData();
+
       alert(`Delivery status updated to ${status}`);
     } catch (error) {
       console.error('Error updating delivery status:', error);
@@ -143,46 +186,83 @@ const AdminPanel = () => {
     }
   };
 
-  // Cancel only for one user
-  const handleCancelDay = async (subId) => {
+  // Cancel only for one user - Add one day grace period
+  const handleCancelDay = async (orderId) => {
     try {
-      const subsRef = doc(db, "subscriptions", subId);
-      await updateDoc(subsRef, {
-        extraDays: increment(1),
+      // Find the order
+      const order = orders.find(o => o.id === orderId);
+      if (!order) {
+        alert("Order not found");
+        return;
+      }
+
+      const orderRef = doc(db, "orders", orderId);
+      const currentExtraDays = order.extraDays || 0;
+
+      // Update the order with extraDays and mark as cancelled
+      await updateDoc(orderRef, {
+        extraDays: currentExtraDays + 1,
+        deliveryStatus: "cancelled",
+        updatedAt: Timestamp.now(),
         events: arrayUnion({
           type: "cancel",
           date: new Date().toISOString(),
         }),
       });
+
+      // Refresh data
+      await fetchData();
+      if (activeTab === 'attendance') {
+        await fetchAttendanceData();
+      }
+
       alert("Cancelled today for this user. Timeline extended by 1 day.");
     } catch (error) {
       console.error("Error cancelling day:", error);
+      alert("Error cancelling delivery");
     }
   };
 
-  // Leave for all users
+  // Leave for all users - Add one day grace period for all active orders
   const handleGlobalLeave = async () => {
     try {
-      const subsSnap = await getDocs(collection(db, "subscriptions"));
-      subsSnap.forEach(async (sub) => {
-        await updateDoc(doc(db, "subscriptions", sub.id), {
-          extraDays: increment(1),
+      // Get all orders that are active for today
+      const todayOrders = attendanceData.orders || [];
+
+      const updatePromises = todayOrders.map(async (order) => {
+        const orderRef = doc(db, "orders", order.id);
+        const currentExtraDays = order.extraDays || 0;
+
+        return updateDoc(orderRef, {
+          extraDays: currentExtraDays + 1,
+          deliveryStatus: "leave",
+          updatedAt: Timestamp.now(),
           events: arrayUnion({
-            type: "leave",
+            type: "global_leave",
             date: new Date().toISOString(),
           }),
         });
       });
+
+      // Wait for all updates to complete
+      await Promise.all(updatePromises);
+
+      // Refresh data
+      await fetchData();
+      if (activeTab === 'attendance') {
+        await fetchAttendanceData();
+      }
+
       alert("Marked today as leave. Timeline extended by 1 day for all users.");
     } catch (error) {
       console.error("Error marking leave:", error);
+      alert("Error marking leave for all users");
     }
   };
 
-  const calculateEndDate = (startDate, planDays, extraDays) => {
-    const start = new Date(startDate);
-    start.setDate(start.getDate() + planDays + extraDays - 1);
-    return start.toLocaleDateString("en-GB"); // dd/mm/yyyy
+  const openAttendanceModal = (order) => {
+    setSelectedAttendanceOrder(order);
+    setShowAttendanceModal(true);
   };
 
   const openOrderModal = (order) => {
@@ -197,7 +277,9 @@ const AdminPanel = () => {
       expired: { color: 'bg-red-100 text-red-800 border-red-200', label: 'Expired' },
       delivered: { color: 'bg-emerald-100 text-emerald-800 border-emerald-200', label: 'Delivered' },
       pending: { color: 'bg-amber-100 text-amber-800 border-amber-200', label: 'Pending' },
-      not_delivered: { color: 'bg-red-100 text-red-800 border-red-200', label: 'Not Delivered' }
+      not_delivered: { color: 'bg-red-100 text-red-800 border-red-200', label: 'Not Delivered' },
+      cancelled: { color: 'bg-gray-100 text-gray-800 border-gray-200', label: 'Cancelled' },
+      leave: { color: 'bg-blue-100 text-blue-800 border-blue-200', label: 'Leave' }
     };
     const config = statusConfig[status] || { color: 'bg-gray-100 text-gray-800 border-gray-200', label: status };
     return <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${config.color}`}>{config.label}</span>;
@@ -564,8 +646,7 @@ const AdminPanel = () => {
                       <div>
                         <h2 className="text-xl font-semibold text-gray-900">Daily Attendance</h2>
                         <p className="text-emerald-700">
-                          {/* <i className="fas fa-clipboard-check mr-1"></i> */}
-                          Track delivery performance and attendance
+                          Track delivery performance and attendance for {selectedDate}
                         </p>
                       </div>
                       <div className="flex items-center space-x-4">
@@ -586,34 +667,28 @@ const AdminPanel = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                       <div className="bg-gradient-to-br from-emerald-500 to-green-500 p-6 rounded-2xl text-white shadow-lg">
                         <div className="text-3xl font-bold">
-                          {/* <i className="fas fa-boxes mr-2"></i> */}
                           {attendanceData.totalOrders || 0}
                         </div>
                         <div className="text-emerald-100">Total Orders</div>
                         <div className="text-xs text-emerald-200 mt-2">
-                          <i className="fas fa-info-circle mr-1"></i>
                           All scheduled deliveries
                         </div>
                       </div>
                       <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-6 rounded-2xl text-white shadow-lg">
                         <div className="text-3xl font-bold">
-                          {/* <i className="fas fa-check-circle mr-2"></i> */}
                           {attendanceData.delivered || 0}
                         </div>
                         <div className="text-emerald-100">Successful Deliveries</div>
                         <div className="text-xs text-emerald-200 mt-2">
-                          <i className="fas fa-truck mr-1"></i>
                           Completed orders
                         </div>
                       </div>
                       <div className="bg-gradient-to-br from-amber-500 to-orange-500 p-6 rounded-2xl text-white shadow-lg">
                         <div className="text-3xl font-bold">
-                          {/* <i className="fas fa-exclamation-triangle mr-2"></i> */}
                           {attendanceData.notDelivered || 0}
                         </div>
                         <div className="text-amber-100">Pending Actions</div>
                         <div className="text-xs text-amber-200 mt-2">
-                          <i className="fas fa-clock mr-1"></i>
                           Requires attention
                         </div>
                       </div>
@@ -622,9 +697,9 @@ const AdminPanel = () => {
                     <div className="flex justify-end mb-4">
                       <button
                         onClick={handleGlobalLeave}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg"
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
                       >
-                        Mark as Today Leave
+                        Mark Today as Leave for All
                       </button>
                     </div>
 
@@ -633,19 +708,15 @@ const AdminPanel = () => {
                         <thead className="bg-gray-50">
                           <tr>
                             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                              {/* <i className="fas fa-hashtag mr-1"></i> */}
-                              Order ID
+                              Customer
                             </th>
                             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                              {/* <i className="fas fa-user mr-1"></i> */}
-                              User
+                              Days Left
                             </th>
                             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                              {/* <i className="fas fa-circle mr-1"></i> */}
-                              Status
+                              Delivery Status
                             </th>
                             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                              {/* <i className="fas fa-cog mr-1"></i> */}
                               Actions
                             </th>
                           </tr>
@@ -653,13 +724,34 @@ const AdminPanel = () => {
                         <tbody className="bg-white divide-y divide-gray-200">
                           {attendanceData.orders?.map((order) => (
                             <tr key={order.id} className="hover:bg-emerald-50/50 transition-colors">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono font-semibold text-emerald-600">
-                                <i className="fas fa-hashtag mr-1"></i>
-                                #{order.id.slice(-8)}
+                              <td className="px-6 py-4">
+                                <div className="flex items-center">
+                                  <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-emerald-400 to-green-400 rounded-full flex items-center justify-center text-white font-semibold">
+                                    {order.customerName?.charAt(0) || 'U'}
+                                  </div>
+                                  <div className="ml-4">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {order.customerName}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      {order.shippingAddress?.address?.substring(0, 30)}...
+                                    </div>
+                                    <button
+                                      onClick={() => openAttendanceModal(order)}
+                                      className="text-emerald-600 hover:text-emerald-800 text-xs mt-1 flex items-center"
+                                    >
+                                      <i className="fas fa-eye mr-1"></i> View Details
+                                    </button>
+                                  </div>
+                                </div>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                <i className="fas fa-user mr-1"></i>
-                                {subscriptions.find(sub => sub.user.id === order.userId)?.user.name || 'Unknown User'}
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-center">
+                                  <div className={`text-lg font-bold ${order.daysLeft <= 7 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                    {order.daysLeft}
+                                  </div>
+                                  <div className="text-xs text-gray-500">days remaining</div>
+                                </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 {getStatusBadge(order.deliveryStatus || 'pending')}
@@ -670,9 +762,9 @@ const AdminPanel = () => {
                                   onChange={(e) => {
                                     const value = e.target.value;
                                     if (value === "cancel") {
-                                      handleCancelDay(order.userId); // extend only that user’s plan
+                                      handleCancelDay(order.id);
                                     } else {
-                                      updateDeliveryStatus(order.id, value); // existing delivery status update
+                                      updateDeliveryStatus(order.id, value);
                                     }
                                   }}
                                   className="text-sm border border-emerald-200 rounded-lg px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
@@ -680,11 +772,19 @@ const AdminPanel = () => {
                                   <option value="pending">Pending</option>
                                   <option value="delivered">Delivered</option>
                                   <option value="not_delivered">Not Delivered</option>
+                                  <option value="leave">Leave</option>
                                   <option value="cancel">Cancel Today</option>
                                 </select>
                               </td>
                             </tr>
                           ))}
+                          {(!attendanceData.orders || attendanceData.orders.length === 0) && (
+                            <tr>
+                              <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                                No deliveries scheduled for {selectedDate}
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -844,6 +944,106 @@ const AdminPanel = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Attendance Order Details Modal */}
+      {showAttendanceModal && selectedAttendanceOrder && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-t-2xl flex justify-between items-center">
+              <h3 className="text-xl font-bold">Delivery Details</h3>
+              <button onClick={() => setShowAttendanceModal(false)} className="text-white hover:text-emerald-200 transition-colors">
+                ✕
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="space-y-6">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-4 text-lg">Customer Information</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
+                      <span className="text-sm font-medium text-gray-700">Name:</span>
+                      <span className="text-sm font-semibold text-emerald-600">{selectedAttendanceOrder.customerName}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
+                      <span className="text-sm font-medium text-gray-700">Email:</span>
+                      <span className="text-sm font-semibold text-emerald-600">{selectedAttendanceOrder.shipping?.email}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
+                      <span className="text-sm font-medium text-gray-700">Phone:</span>
+                      <span className="text-sm font-semibold text-emerald-600">{selectedAttendanceOrder.shipping?.phone}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
+                      <span className="text-sm font-medium text-gray-700">Days Left:</span>
+                      <span className="text-sm font-semibold text-emerald-600">{selectedAttendanceOrder.daysLeft} days</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
+                      <span className="text-sm font-medium text-gray-700">Status:</span>
+                      <span>{getStatusBadge(selectedAttendanceOrder.deliveryStatus)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-4 text-lg">Delivery Address</h4>
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <p className="font-medium text-gray-900">{selectedAttendanceOrder.shippingAddress?.address}</p>
+                    <p className="text-gray-600 mt-1">{selectedAttendanceOrder.shippingAddress?.city}, {selectedAttendanceOrder.shippingAddress?.state}</p>
+                    <p className="text-gray-600">Pincode: {selectedAttendanceOrder.shippingAddress?.pincode}</p>
+                    <p className="text-gray-600">Country: {selectedAttendanceOrder.shippingAddress?.country}</p>
+                  </div>
+                </div>
+
+                {selectedAttendanceOrder.shippingAddress?.location && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-4 text-lg">Delivery Location</h4>
+                    <MapContainer
+                      center={[selectedAttendanceOrder.shippingAddress.location.lat, selectedAttendanceOrder.shippingAddress.location.lng]}
+                      zoom={15}
+                      scrollWheelZoom={false}
+                      className="w-full h-64 rounded-xl"
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.google.com/maps">Google</a>'
+                        url="https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}"
+                        subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+                      />
+                      <Marker
+                        position={[selectedAttendanceOrder.shippingAddress.location.lat, selectedAttendanceOrder.shippingAddress.location.lng]}
+                        icon={markerIcon}
+                      >
+                        <Popup>Delivery Location for {selectedAttendanceOrder.customerName}</Popup>
+                      </Marker>
+                    </MapContainer>
+                  </div>
+                )}
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-4 text-lg">Update Delivery Status</h4>
+                  <select
+                    value={selectedAttendanceOrder.deliveryStatus || 'pending'}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "cancel") {
+                        handleCancelDay(selectedAttendanceOrder.id);
+                        setShowAttendanceModal(false);
+                      } else {
+                        updateDeliveryStatus(selectedAttendanceOrder.id, value);
+                        setShowAttendanceModal(false);
+                      }
+                    }}
+                    className="w-full text-sm border border-emerald-200 rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="not_delivered">Not Delivered</option>
+                    <option value="leave">Leave</option>
+                    <option value="cancel">Cancel Today</option>
+                  </select>
                 </div>
               </div>
             </div>

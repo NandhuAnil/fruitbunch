@@ -7,11 +7,17 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cartItems } = useCart();
   const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
+    }
+
+    const storedIsAdmin = localStorage.getItem("isAdmin");
+    if (storedIsAdmin) {
+      setIsAdmin(JSON.parse(storedIsAdmin));
     }
   }, []);
 
@@ -70,6 +76,11 @@ const Navbar = () => {
                 </Link>
               ) : (
                 <>
+                  {isAdmin && (
+                    <Link to="/admin" className="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-md transition">
+                      Admin Dashboard
+                    </Link>
+                  )}
                   <Link to="/cart" className="relative bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-md transition flex items-center">
                     <i className="fa-solid fa-cart-shopping mr-2"></i> Cart
                     {cartItems.length > 0 && (
@@ -115,6 +126,11 @@ const Navbar = () => {
                   </Link>
                 ) : (
                   <>
+                    {isAdmin && (
+                      <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-md text-center transition">
+                        Admin Dashboard
+                      </Link>
+                    )}
                     <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="relative bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-md text-center transition flex items-center justify-center">
                       <i className="fa-solid fa-cart-shopping mr-2"></i> Cart
                       {cartItems.length > 0 && (

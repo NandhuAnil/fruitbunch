@@ -60,6 +60,7 @@ const Signup = () => {
         phone: formData.phone,
         createdAt: serverTimestamp(),
       });
+      await setDoc(doc(db, "phoneToUid", formData.phone), { uid: user.uid });
 
       console.log("User created & saved:", user.uid);
 
