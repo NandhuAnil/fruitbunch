@@ -67,8 +67,12 @@ const PrivacyPolicy = () => {
                 <h4 className="font-semibold text-blue-900 text-sm mb-2">Questions?</h4>
                 <p className="text-blue-700 text-xs">
                   Contact our privacy team at{' '}
-                  <a href="mailto:privacy@freshdaily.com" className="underline">
-                    privacy@freshdaily.com
+                  <p className='font-medium text-lg'>Hariharan</p>
+                  <a href="mailto:fruitbunch.tvm@gmail.com" className="underline">
+                    fruitbunch.tvm@gmail.com
+                  </a><br />or call us at{' '}
+                  <a href="tel:+918807239379" className="underline">
+                    +91 88072 39379
                   </a>
                 </p>
               </div>
