@@ -188,6 +188,7 @@ const Checkout = () => {
   // ----- Handle checkout -----
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!location) {
       alert("Please set a delivery location.");
       return;
@@ -196,6 +197,40 @@ const Checkout = () => {
     setProcessingPayment(true);
 
     try {
+      if (paymentMethod === "cod") {
+        // COD Order
+        const orderRef = await addDoc(collection(db, "orders"), {
+          userId: user?.uid,
+          items: cartItems,
+          amount: cartTotal,
+          currency: "INR",
+          status: "Pending (COD)", // COD orders start as pending
+          paymentMethod: "COD",
+          createdAt: serverTimestamp(),
+          shipping: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            pincode: formData.pincode,
+            country: formData.country,
+            location: location, // { lat, lng }
+          },
+        });
+
+        clearCart();
+        navigate("/orderconfirmation", {
+          state: { orderId: orderRef.id, payment: "cod" },
+        });
+
+        setProcessingPayment(false);
+        return;
+      }
+
+      // Online Payment (Card / UPI → Razorpay)
       const { data } = await axios.post(createOrderUrl, {
         amount: cartTotal,
         currency: "INR",
@@ -203,15 +238,16 @@ const Checkout = () => {
 
       const { orderId, keyId, amount } = data;
 
+      // Store initial order (status "Initiated")
       await addDoc(collection(db, "orders"), {
         userId: user?.uid,
         items: cartItems,
         amount: cartTotal,
         currency: "INR",
-        status: "Success",
+        status: "Initiated",
+        paymentMethod,
         razorpayOrderId: orderId,
         createdAt: serverTimestamp(),
-
         shipping: {
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -222,27 +258,31 @@ const Checkout = () => {
           state: formData.state,
           pincode: formData.pincode,
           country: formData.country,
-          location: location // { lat, lng }
-        }
+          location: location,
+        },
       });
+
+      let paymentDescription = "";
+      if (cartItems.length === 1) {
+        paymentDescription = `Payment for ${cartItems[0].name}`;
+      } else {
+        paymentDescription = `Payment for ${cartItems[0].name} + ${cartItems.length - 1} more item(s)`;
+      }
 
       const options = {
         key: keyId,
         amount,
         currency: "INR",
         name: "Fruit Bunch",
-        description: "Order Payment",
+        description: paymentDescription,
         order_id: orderId,
         handler: async function (response) {
           try {
-            const verifyRes = await axios.post(
-              verifyPaymentUrl,
-              {
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-              }
-            );
+            const verifyRes = await axios.post(verifyPaymentUrl, {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            });
 
             if (verifyRes.data.success) {
               await addDoc(collection(db, "payments"), {
@@ -255,7 +295,7 @@ const Checkout = () => {
 
               clearCart();
               navigate("/orderconfirmation", {
-                state: { orderId, payment: "online" },
+                state: { orderId, payment: paymentMethod },
               });
             } else {
               alert("Payment verification failed!");
@@ -279,7 +319,7 @@ const Checkout = () => {
       rzp.open();
     } catch (err) {
       console.error("Order error:", err);
-      alert("Failed to start payment.");
+      alert("Failed to place order.");
       setProcessingPayment(false);
     }
   };
@@ -598,7 +638,7 @@ const Checkout = () => {
                   UPI
                 </label>
               </div>
-              {/* <div className="flex items-center">
+              <div className="flex items-center">
                 <input
                   id="cod"
                   name="paymentMethod"
@@ -611,7 +651,7 @@ const Checkout = () => {
                 <label htmlFor="cod" className="ml-3 block text-sm font-medium text-gray-700">
                   Cash on Delivery
                 </label>
-              </div> */}
+              </div>
             </div>
 
             <div className="flex space-x-4">
