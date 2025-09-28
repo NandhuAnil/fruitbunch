@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import bulk1 from "../assets/images/bulk1.jpeg";
+import bulk2 from "../assets/images/bulk2.jpeg";
+import bulk3 from "../assets/images/bulk3.jpeg";
 import primeplan from "../assets/images/primeplan.jpg";
 import homeplan from "../assets/images/homeplan.jpg";
 import BasePlanimage from '../assets/images/basicplan.jpg';
@@ -27,7 +30,7 @@ const Corporate = () => {
   const [currentImage, setCurrentImage] = useState(0);
 
   // Hero images
-  const heroImages = [primeplan, homeplan];
+  const heroImages = [bulk1, bulk2, bulk3];
 
   // Hero image rotation
   useEffect(() => {

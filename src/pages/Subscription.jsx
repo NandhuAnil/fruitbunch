@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
-import BasePlanimage from '../assets/images/basicplan.jpg';
-import Premiumimage from '../assets/images/primeplan.jpg';
+import BasePlanimage from '../assets/images/BasicPlanImage.jpeg';
+import Premiumimage from '../assets/images/PeriumPlanImage.jpeg';
 import diabeticplan from '../assets/images/fruit-7.jpg';
-import balanceddiet from '../assets/images/dietplan.jpg';
+import balanceddiet from '../assets/images/BalancedDiet.jpeg';
 import saladplan from '../assets/images/juice2.jpg';
 import kidsplan from '../assets/images/kidsplan.jpg';
 import freshjuice from '../assets/images/freshjuice.jpg';
@@ -64,7 +64,7 @@ const Subscription = () => {
     },
     {
       id: 4,
-      name: "Balanced Diet",
+      name: "Diet platter",
       price: 3499,
       image: balanceddiet,
       description: "2 Fruit, 2 Vegetables, Dry Fruit",
@@ -73,7 +73,7 @@ const Subscription = () => {
     },
     {
       id: 5,
-      name: "Salad plan",
+      name: "Salad Bowl",
       price: 2499,
       image: saladplan,
       description: "Nutrients, Quality Proteins, Good fat",

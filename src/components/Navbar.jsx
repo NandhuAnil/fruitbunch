@@ -114,14 +114,19 @@ const Navbar = () => {
                     Login
                   </Link>
                 ) : (
-                  <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="relative bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-md text-center transition flex items-center justify-center">
-                    <i className="fa-solid fa-cart-shopping mr-2"></i> Cart
-                    {cartItems.length > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                        {cartItems.length}
-                      </span>
-                    )}
-                  </Link>
+                  <>
+                    <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="relative bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-md text-center transition flex items-center justify-center">
+                      <i className="fa-solid fa-cart-shopping mr-2"></i> Cart
+                      {cartItems.length > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                          {cartItems.length}
+                        </span>
+                      )}
+                    </Link>
+                    <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="relative bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-md text-center transition flex items-center justify-center">
+                      <i className="fa-solid fa-user mr-2"></i> Profile
+                    </Link>
+                  </>
                 )}
               </div>
             </div>
