@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
+import { HashRouter as Router, Routes, Route, Outlet, Navigate } from "react-router-dom";
 import PrivateRoute from "./utils/PrivateRoute";
 import AdminRoute from "./utils/AdminRoute";
 import Navbar from "./components/Navbar";
@@ -22,7 +22,7 @@ import TermsAndConditions from "./pages/TermsAndCondition";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ScrollToTop from "./components/ScrollToTop";
 
-// Layout for all "main" user pages
+// Layout with Navbar + Footer
 function MainLayout() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -40,9 +40,10 @@ function MainLayout() {
 function App() {
   return (
     <CartProvider>
-      <Router basename="/fruitbunch">
+      {/* HashRouter ensures GitHub Pages works */}
+      <Router>
         <Routes>
-          {/* All routes that share Navbar + Footer */}
+          {/* Routes with Navbar/Footer */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/subscription" element={<Subscription />} />
@@ -59,7 +60,16 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/termsandconditions" element={<TermsAndConditions />} />
+            <Route path="/privacypolicy" element={<PrivacyPolicy />} />
           </Route>
+
+          {/* Routes without layout */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+
+          {/* Admin route */}
           <Route
             path="/admin"
             element={
@@ -68,12 +78,9 @@ function App() {
               </AdminRoute>
             }
           />
-          {/* Auth routes without Navbar/Footer */}
-          <Route path="/termsandconditions" element={<TermsAndConditions />} />
-          <Route path="/privacypolicy" element={<PrivacyPolicy />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+
+          {/* Redirect unknown to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </CartProvider>
