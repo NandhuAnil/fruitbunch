@@ -1,0 +1,30 @@
+{
+  "defaults": {
+    "project": 1,
+    "env": 1
+  },
+  "actives": {
+    "project": 1,
+    "env": 1
+  },
+  "projects": [
+    {
+      "idx": 1,
+      "id": "15482000000035019",
+      "name": "FruitBunch",
+      "domain": {
+        "id": "50034009857",
+        "name": "fruitbunch-60038593393.development"
+      },
+      "timezone": "Asia/Kolkata",
+      "env": [
+        {
+          "idx": 1,
+          "id": "60038593393",
+          "name": "Development",
+          "type": 3
+        }
+      ]
+    }
+  ]
+}

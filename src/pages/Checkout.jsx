@@ -16,6 +16,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+const createOrderUrl = import.meta.env.VITE_API_CREATE_ORDER;
+const verifyPaymentUrl = import.meta.env.VITE_API_VERIFY_PAYMENT;
+
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
   const navigate = useNavigate();
@@ -23,6 +26,14 @@ const Checkout = () => {
   const user = auth.currentUser;
 
   const [processingPayment, setProcessingPayment] = useState(false);
+
+  if (processingPayment) {
+    document.body.style.pointerEvents = 'none';
+    document.body.style.opacity = '0.6';
+  } else {
+    document.body.style.pointerEvents = 'auto';
+    document.body.style.opacity = '1';
+  }
 
   // Form state
   const [formData, setFormData] = useState({
@@ -185,7 +196,7 @@ const Checkout = () => {
     setProcessingPayment(true);
 
     try {
-      const { data } = await axios.post("http://localhost:5000/create-order", {
+      const { data } = await axios.post(createOrderUrl, {
         amount: cartTotal,
         currency: "INR",
       });
@@ -219,13 +230,13 @@ const Checkout = () => {
         key: keyId,
         amount,
         currency: "INR",
-        name: "Your Shop",
+        name: "Fruit Bunch",
         description: "Order Payment",
         order_id: orderId,
         handler: async function (response) {
           try {
             const verifyRes = await axios.post(
-              "http://localhost:5000/verify-payment",
+              verifyPaymentUrl,
               {
                 razorpayOrderId: response.razorpay_order_id,
                 razorpayPaymentId: response.razorpay_payment_id,
@@ -421,12 +432,12 @@ const Checkout = () => {
 
             <div className="mb-4">
               <div className="flex justify-between items-center mb-3">
-                <label className="block text-sm font-medium text-gray-700">Delivery Location</label>
+                <label className="block text-xs md:text-sm font-medium text-gray-700">Delivery Location</label>
                 <div className="flex items-center space-x-2">
                   <select
                     value={mapType}
                     onChange={(e) => setMapType(e.target.value)}
-                    className="text-sm border border-gray-300 rounded px-2 py-1"
+                    className="text-xs md:text-sm border border-gray-300 rounded px-2 py-1"
                   >
                     <option value="satellite">Satellite</option>
                     <option value="street">Street</option>
@@ -435,7 +446,7 @@ const Checkout = () => {
                     type="button"
                     onClick={detectLocation}
                     disabled={isLoadingLocation}
-                    className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center"
+                    className="text-xs md:text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center"
                   >
                     {isLoadingLocation ? (
                       <>

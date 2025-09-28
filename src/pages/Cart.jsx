@@ -33,8 +33,8 @@ const Cart = () => {
           <p className="text-lg text-gray-600 mb-8">
             Looks like you haven't added any items to your cart yet.
           </p>
-          <Link 
-            to="/subscription" 
+          <Link
+            to="/subscription"
             className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg transition"
           >
             Continue Shopping
@@ -47,27 +47,26 @@ const Cart = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Your Cart</h1>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-6">Cart Items ({cartItems.length})</h2>
-            
+
             <div className="space-y-6">
               {cartItems.map(item => (
                 <div key={item.id} className="flex items-center border-b border-gray-100 pb-6">
-                  <img 
-                    src={item.image} 
-                    alt={item.name} 
+                  <img
+                    src={item.image}
+                    alt={item.name}
                     className="w-20 h-20 object-cover rounded-lg"
                   />
-                  
+
                   <div className="ml-4 flex-grow">
                     <h3 className="font-medium text-gray-800 text-lg">{item.name}</h3>
                     <p className="text-green-600 font-bold">₹{item.price}</p>
                   </div>
-                  
                   <div className="flex items-center ml-4">
                     <button
                       onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
@@ -85,14 +84,13 @@ const Cart = () => {
                       +
                     </button>
                   </div>
-                  
-                  <div className="ml-6">
+                  <div className="ml-6 hidden md:block">
                     <p className="font-bold text-green-600">₹{item.price * item.quantity}</p>
                   </div>
-                  
+
                   <button
                     onClick={() => handleRemoveItem(item.id)}
-                    className="ml-6 text-red-500 hover:text-red-700"
+                    className="ml-6 text-red-500 hover:text-red-700 hidden md:block"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -101,10 +99,10 @@ const Cart = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="flex justify-between mt-8">
-              <Link 
-                to="/subscription" 
+              <Link
+                to="/subscription"
                 className="flex items-center text-green-600 hover:text-green-800 font-medium"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,7 +110,7 @@ const Cart = () => {
                 </svg>
                 Continue Shopping
               </Link>
-              
+
               <button
                 onClick={clearCart}
                 className="text-red-500 hover:text-red-700 font-medium"
@@ -122,12 +120,12 @@ const Cart = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Order Summary */}
         <div>
           <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
             <h2 className="text-xl font-semibold text-gray-800 mb-6">Order Summary</h2>
-            
+
             <div className="space-y-4">
               {cartItems.map(item => (
                 <div key={item.id} className="flex justify-between">
@@ -138,7 +136,7 @@ const Cart = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="border-t border-gray-200 mt-4 pt-4">
               <div className="flex justify-between mb-2">
                 <span>Subtotal</span>
@@ -153,15 +151,14 @@ const Cart = () => {
                 <span>₹{cartTotal}</span>
               </div>
             </div>
-            
+
             <div className="mt-6">
               <Link
                 to="/checkout"
                 onClick={handleProceedToCheckout}
                 disabled={isProcessing}
-                className={`w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center ${
-                  isProcessing ? 'opacity-75 cursor-not-allowed' : ''
-                }`}
+                className={`w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center ${isProcessing ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
               >
                 {isProcessing ? (
                   <>
